@@ -1,0 +1,67 @@
+package chromosome.action;
+
+import spoon.reflect.declaration.CtConstructor;
+import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtParameter;
+
+import java.util.ArrayList;
+import java.util.Objects;
+
+public abstract class Action {
+    private String type;
+    private String varName;
+    private ArrayList<String> paramTypes = new ArrayList<>();
+
+    public Action(CtMethod<?> method, String varName) {
+        this.type = method.getType().getSimpleName();
+        this.varName = varName;
+        for (CtParameter<?> parameter : method.getParameters()) {
+            this.paramTypes.add(parameter.getType().getSimpleName());
+        }
+    }
+
+    public Action(CtConstructor<Object> constructor, String varName) {
+        this.type = constructor.getType().getSimpleName();
+        this.varName = varName;
+        for (CtParameter<?> parameter : constructor.getParameters()) {
+            this.paramTypes.add(parameter.getType().getSimpleName());
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Action)) return false;
+        Action action = (Action) o;
+        return Objects.equals(type, action.type) && Objects.equals(varName, action.varName) && Objects.equals(paramTypes, action.paramTypes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, varName, paramTypes);
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getVarName() {
+        return varName;
+    }
+
+    public void setVarName(String varName) {
+        this.varName = varName;
+    }
+
+    public ArrayList<String> getParamTypes() {
+        return paramTypes;
+    }
+
+    public void setParamTypes(ArrayList<String> paramTypes) {
+        this.paramTypes = paramTypes;
+    }
+}

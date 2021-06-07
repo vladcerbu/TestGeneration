@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="600.0" style="-fx-background-color: lightblue;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainController">
+   <children>
+      <Label layoutX="121.0" layoutY="32.0" text="TEST CASE GENERATION" textFill="#5900a2">
+         <font>
+            <Font name="Calibri Bold" size="36.0" />
+         </font>
+      </Label>
+      <Label layoutX="66.0" layoutY="159.0" text="Min. Numerical Value:">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="311.0" layoutY="159.0" text="Max. Numerical Value:">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="66.0" layoutY="200.0" text="Max. String Length:">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="312.0" layoutY="200.0" text="Max. Solution Length:">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="66.0" layoutY="241.0" text="Strings contain:">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Label fx:id="stateLabel" layoutX="66.0" layoutY="365.0" text="State: App Started" textFill="#03aa00">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label fx:id="resultLabel" layoutX="66.0" layoutY="402.0" text="Result:" visible="false">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <Button layoutX="69.0" layoutY="109.0" mnemonicParsing="false" onAction="#handleFileChoice" prefHeight="30.0" prefWidth="120.0" text="Choose File">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Button>
+      <TextField fx:id="classPathTextField" layoutX="207.0" layoutY="111.0" prefHeight="26.0" prefWidth="330.0" promptText="Full Path of the Target Class" />
+      <TextField fx:id="minNrTextField" layoutX="207.0" layoutY="156.0" prefHeight="26.0" prefWidth="80.0" promptText="Min nr." />
+      <TextField fx:id="maxNrTextField" layoutX="456.0" layoutY="156.0" prefHeight="26.0" prefWidth="80.0" promptText="Max nr." />
+      <TextField fx:id="strLengthTextField" layoutX="207.0" layoutY="197.0" prefHeight="26.0" prefWidth="80.0" promptText="Str. Length" />
+      <TextField fx:id="solLengthTextField" layoutX="456.0" layoutY="197.0" prefHeight="26.0" prefWidth="80.0" promptText="Sol. Length" />
+      <RadioButton fx:id="small1" layoutX="178.0" layoutY="242.0" mnemonicParsing="false" selected="true" text="Small letters">
+         <toggleGroup>
+            <ToggleGroup fx:id="tog" />
+         </toggleGroup>
+      </RadioButton>
+      <RadioButton fx:id="big2" layoutX="269.0" layoutY="242.0" mnemonicParsing="false" text="+Big letters" toggleGroup="$tog" />
+      <RadioButton fx:id="numbers3" layoutX="366.0" layoutY="242.0" mnemonicParsing="false" text="+Numbers" toggleGroup="$tog" />
+      <RadioButton fx:id="others4" layoutX="455.0" layoutY="242.0" mnemonicParsing="false" text="+Others" toggleGroup="$tog" />
+      <CheckBox fx:id="firstCheckBox" layoutX="158.0" layoutY="281.0" mnemonicParsing="false" text="Only the first solution with 100% coverage">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </CheckBox>
+      <Button layoutX="240.0" layoutY="310.0" mnemonicParsing="false" onAction="#handleGenerate" prefHeight="40.0" prefWidth="120.0" text="Generate" textFill="#018c11">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font></Button>
+   </children>
+</AnchorPane>
