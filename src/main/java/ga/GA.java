@@ -20,8 +20,10 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class GA {
-    private final ResultWriter resultWriter;
-    private final TestSuiteExecutor executor = new TestSuiteExecutor();
+    private String classPath;
+    private String resultFile;
+    private ResultWriter resultWriter;
+    private TestSuiteExecutor executor;
     private RandomHelper randomHelper;
     private ASTParser ast;
     private ArrayList<TestSuite> population;
@@ -30,13 +32,16 @@ public class GA {
     private int minNr;
     private int maxNr;
     private int stringType;
-    private boolean onlyFirst = false;
+    private boolean onlyFirst;
+    private int populationSize;
+    private int generations;
+    private double crossoverProb;
+    private double initialAdditionProb;
     private final int varNameLength = Integer.parseInt(ApplicationContext.getProperties().getProperty("data.varNameLength"));
-    private final int populationSize = Integer.parseInt(ApplicationContext.getProperties().getProperty("data.populationSize"));
-    private final int generations = Integer.parseInt(ApplicationContext.getProperties().getProperty("data.generations"));
-    private final double crossoverProb = Double.parseDouble(ApplicationContext.getProperties().getProperty("data.crossoverProb"));
-    private final double initialAdditionProb = Double.parseDouble(ApplicationContext.getProperties().getProperty("data.initialAdditionProb"));
+    private double time = 0.0;
 
+    // Comparator for sorting the chromosomes. Biggest fitness first,
+    // if equal then we choose the smallest one in terms of test case number
     private final Comparator<TestSuite> comp = (o1, o2) -> {
         if (o1.getFitness() > o2.getFitness())
             return -1;
@@ -46,12 +51,27 @@ public class GA {
             return Integer.compare(o1.getTestCases().size(), o2.getTestCases().size());
     };
 
-    public GA(ResultWriter resultWriter) {
-        this.resultWriter = resultWriter;
+    // Constructor
+    public GA() { }
+
+    // Getters and Setters section
+    public double getTime() {
+        return time;
     }
 
     public double getBestFitness() {
         return population.get(0).getFitness();
+    }
+
+    public double getWorstFitness() {
+        return population.get(population.size() - 1).getFitness();
+    }
+
+    public double getAverageFitness() {
+        double total = 0.0;
+        for (TestSuite chromosome : population)
+            total += chromosome.getFitness();
+        return total / population.size();
     }
 
     public void setStringType(int stringType) {
@@ -59,6 +79,30 @@ public class GA {
             this.stringType = 1;
         else
             this.stringType = stringType;
+    }
+
+    public void setClassPath(String classPath) {
+        this.classPath = classPath;
+    }
+
+    public void setResultFile(String resultFile) {
+        this.resultFile = resultFile;
+    }
+
+    public void setPopulationSize(int populationSize) {
+        this.populationSize = populationSize;
+    }
+
+    public void setGenerations(int generations) {
+        this.generations = generations;
+    }
+
+    public void setCrossoverProb(double crossoverProb) {
+        this.crossoverProb = crossoverProb;
+    }
+
+    public void setInitialAdditionProb(double initialAdditionProb) {
+        this.initialAdditionProb = initialAdditionProb;
     }
 
     public void setOnlyFirst(boolean onlyFirst) {
@@ -81,18 +125,28 @@ public class GA {
         this.maxSuiteLength = maxSuiteLength;
     }
 
+    // Checking maximum suite size and adjusting it if it is too small
     private void checkMaxSuiteSize() {
         if (this.maxSuiteLength < 5 * this.ast.getMethods().size())
             this.maxSuiteLength = 5 * this.ast.getMethods().size();
     }
 
-    public void start(String classPath) {
-        this.randomHelper = new RandomHelper(this.minNr, this.maxNr, this.maxStringLength, this.stringType);
+    // Initializing the algorithm. Create necessary classes and generate random population
+    private void initialize() {
+        this.executor = new TestSuiteExecutor();
+        this.resultWriter = new ResultWriter(resultFile);
+        this.randomHelper = new RandomHelper(minNr, maxNr, maxStringLength, stringType);
         this.ast = new ASTParser(classPath);
         checkMaxSuiteSize();
         generateRandomPopulation();
         evaluatePopulation();
         population.sort(comp);
+    }
+
+    // Genetic Algorithm main function
+    public void start() {
+        long start = System.nanoTime();
+        initialize();
         for (int gen = 0; gen < generations; gen++) {
             if (onlyFirst && population.get(0).getFitness() == 1.0)
                 break;
@@ -101,7 +155,7 @@ public class GA {
             while (newPop.size() < populationSize) {
                 ArrayList<TestSuite> offsprings;
                 ArrayList<TestSuite> parents = select();
-                if (randomHelper.generateRandomDouble(0, 1) <= crossoverProb)
+                if (randomHelper.generateRandomDouble(0, 1) < crossoverProb)
                     offsprings = crossover(parents.get(0), parents.get(1));
                 else
                     offsprings = parents;
@@ -120,8 +174,7 @@ public class GA {
                             newPop.add(offsprings.get(i));
                         else
                             newPop.add(parents.get(i));
-                }
-                else {
+                } else {
                     newPop.add(parents.get(0));
                     newPop.add(parents.get(1));
                 }
@@ -132,17 +185,32 @@ public class GA {
                 population.subList(populationSize, population.size()).clear();
             }
         }
+
+        // Optimize found test suite by potentially reducing its length
+        // population.set(0, optimizeSolution(population.get(0)));
+        // Write the resulted test suite (the best one)
         try {
-            resultWriter.write(population.get(0));
-        }
-        catch (IOException ignored) {
+            resultWriter.writeSuite(population.get(0));
+        } catch (IOException ignored) {
 
         }
-        File file = new File("./spooned/" + population.get(0).getClassName() + ".java");
+
+        // Delete spooned file
+        File file = new File("./src/main/resources/spooned/" + population.get(0).getClassName() + ".java");
         //noinspection ResultOfMethodCallIgnored
         file.delete();
+
+        // Writing performance stats
+        long end = System.nanoTime();
+        this.time = (double) (end - start) / 1E9;
+        try {
+            resultWriter.writePerformance(population.get(0).getClassName(), generations, populationSize, getBestFitness(), getAverageFitness(), getWorstFitness(), time);
+        } catch (IOException ignored) {
+
+        }
     }
 
+    // Selection operator
     private ArrayList<TestSuite> select() {
         ArrayList<TestSuite> selected = new ArrayList<>();
         double sumRanks = populationSize * (populationSize + 1) / 2.0;
@@ -177,6 +245,7 @@ public class GA {
         return selected;
     }
 
+    // Crossover operator
     private ArrayList<TestSuite> crossover(TestSuite c1, TestSuite c2) {
         double a = randomHelper.generateRandomDouble(0, 1);
         ArrayList<TestCase> tc1 = c1.getTestCases();
@@ -199,6 +268,7 @@ public class GA {
         return offsprings;
     }
 
+    // Mutation operator
     private TestSuite mutate(TestSuite testSuite) {
         ArrayList<TestCase> testCases = testSuite.getTestCases();
         ArrayList<TestCase> toDelete = new ArrayList<>();
@@ -249,6 +319,7 @@ public class GA {
         return validateChromosome(testSuite);
     }
 
+    // Validation of a test suite (it needs to have different variable names)
     private TestSuite validateChromosome(TestSuite testSuite) {
         Set<TestCase> setTC = new LinkedHashSet<>(testSuite.getTestCases());
         testSuite.setTestCases(new ArrayList<>(setTC));
@@ -280,6 +351,7 @@ public class GA {
         return testSuite;
     }
 
+    // Generating a random population of the given size
     private void generateRandomPopulation() {
         this.population = new ArrayList<>();
         for (int i = 0; i < populationSize; ++i) {
@@ -291,10 +363,12 @@ public class GA {
                 testCases.add(testCase);
             }
             testSuite.setTestCases(testCases);
+            validateChromosome(testSuite);
             population.add(testSuite);
         }
     }
 
+    // Generating random test cases for a suite
     private TestCase generateRandomTestCase() {
         ArrayList<Action> actions = new ArrayList<>();
         String calln = randomHelper.generateRandomVarName(varNameLength);
@@ -309,16 +383,32 @@ public class GA {
         return new TestCase(methodAction.getMethodName(), actions, values);
     }
 
+    // Evaluating the population
     private void evaluatePopulation() {
         for (TestSuite testSuite : population)
             testSuite.setFitness(evaluateChromosome(testSuite));
     }
 
+    // Evaluating a chromosome
     private double evaluateChromosome(TestSuite testSuite) {
         try {
             return executor.execute(testSuite);
         } catch (Exception e) {
             return randomHelper.generateRandomDouble(0, 1);
         }
+    }
+
+    // Optimizing a test suite by trying to delete some test cases and see if it impacts the fitness
+    private TestSuite optimizeSolution(TestSuite testSuite) {
+        TestSuite newSuite = new TestSuite(testSuite.getClassName(), testSuite.getTestCases());
+        newSuite.getTestCases().remove(randomHelper.generateRandomInteger(0, newSuite.getTestCases().size() - 1));
+        newSuite.setFitness(evaluateChromosome(newSuite));
+        while(testSuite.getFitness().equals(newSuite.getFitness())) {
+            testSuite = newSuite;
+            newSuite = new TestSuite(testSuite.getClassName(), testSuite.getTestCases());
+            newSuite.getTestCases().remove(randomHelper.generateRandomInteger(0, newSuite.getTestCases().size() - 1));
+            newSuite.setFitness(evaluateChromosome(newSuite));
+        }
+        return testSuite;
     }
 }

@@ -14,10 +14,17 @@ public class ResultWriter {
         this.resultsFile = resultsFile;
     }
 
-    public void write(TestSuite testSuite) throws IOException {
+    public void writeSuite(TestSuite testSuite) throws IOException {
         String fileName = this.resultsFile + "\\\\" + testSuite.getClassName() + "Test.java";
-        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, false));
         writer.write(testSuite.toString());
+        writer.close();
+    }
+
+    public void writePerformance(String className, int generations, int populationSize, double bestFitness, double averageFitness, double worstFitness, double time) throws IOException {
+        String fileName = this.resultsFile + "\\\\" + className + "Test_performance_nrGen" + generations + "_popSize" + populationSize + ".csv";
+        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true));
+        writer.write(bestFitness + "," + averageFitness + "," + worstFitness + "," + time + "\n");
         writer.close();
     }
 }

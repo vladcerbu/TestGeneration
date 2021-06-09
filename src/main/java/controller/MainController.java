@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.paint.Paint;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -17,6 +18,7 @@ public class MainController {
 
     private Stage stage;
     private GA ga;
+    private int nrRuns;
 
     @FXML
     private TextField classPathTextField;
@@ -28,6 +30,18 @@ public class MainController {
     private TextField strLengthTextField;
     @FXML
     private TextField solLengthTextField;
+    @FXML
+    private TextField resultPathTextField;
+    @FXML
+    private TextField populationSizeTextField;
+    @FXML
+    private TextField generationsNumberTextField;
+    @FXML
+    private TextField crossoverProbabilityTextField;
+    @FXML
+    private TextField additionProbabilityTextField;
+    @FXML
+    private Spinner<Integer> nrRunsSpinner;
 
     @FXML
     private RadioButton small1;
@@ -47,11 +61,11 @@ public class MainController {
 
     @FXML
     public void initialize() {
-
+        nrRunsSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1));
     }
 
-    public void init(GA ga, Stage stage) {
-        this.ga = ga;
+    public void init(Stage stage) {
+        this.ga = new GA();
         this.stage = stage;
     }
 
@@ -82,28 +96,66 @@ public class MainController {
             resultLabel.setTextFill(Paint.valueOf("Yellow"));
         if (result <= 75.0)
             resultLabel.setTextFill(Paint.valueOf("Red"));
-        resultLabel.setText("Result: The solution has a coverage of " + Double.valueOf(df.format(result)) + "%");
+        resultLabel.setText("Result: The solution has a coverage of " + Double.valueOf(df.format(result)) + "%  Time: " + Double.valueOf(df.format(this.ga.getTime())) + "s");
         resultLabel.setVisible(true);
     }
 
     @FXML
-    public void handleFileChoice() {
+    public void handleClassFileChoice() {
         FileChooser fileChooser = new FileChooser();
         File selected = fileChooser.showOpenDialog(stage);
-        classPathTextField.setText(selected.getAbsolutePath());
+        if (selected != null && selected.exists() && selected.isFile() && selected.toString().endsWith(".java"))
+            classPathTextField.setText(selected.getAbsolutePath());
+        else
+            classPathTextField.setText("You need to specify a .java file.");
+    }
+
+    @FXML
+    public void handleResultFileChoice() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        File selected = directoryChooser.showDialog(stage);
+        if (selected != null && selected.exists() && selected.isDirectory())
+            resultPathTextField.setText(selected.getAbsolutePath());
+        else
+            resultPathTextField.setText("You need to specify a directory.");
     }
 
     @FXML
     public void handleGenerate() {
-        int minNr, maxNr, strLength, solLength;
+        if (prepareParameters()) {
+                Thread thread = new Thread(() -> {
+                    for (int i = 0; i < nrRuns; ++i) {
+                        System.out.println(i + 1);
+                        Platform.runLater(this::stateGenerating);
+                        try {
+                            this.ga.start();
+                            Platform.runLater(this::stateDone);
+                        } catch (Exception exception) {
+                            Platform.runLater(() -> stateFailed(exception));
+                        }
+                    }
+                });
+                thread.setDaemon(true);
+                thread.start();
+
+        }
+    }
+
+    private boolean prepareParameters() {
+        int minNr, maxNr, strLength, solLength, populationSize, generations;
+        double crossoverProb, initialAdditionProb;
+        nrRuns = nrRunsSpinner.getValue();
 
         try {
             minNr = Integer.parseInt(minNrTextField.getText());
             maxNr = Integer.parseInt(maxNrTextField.getText());
-            if (minNr <= maxNr) {
-                this.ga.setMinNr(minNr);
-                this.ga.setMaxNr(maxNr);
+            if (minNr > maxNr) {
+                int temp = minNr;
+                minNr = maxNr;
+                maxNr = temp;
             }
+            this.ga.setMinNr(minNr);
+            this.ga.setMaxNr(maxNr);
         } catch (NumberFormatException ignored) {
             this.ga.setMinNr(Integer.parseInt(ApplicationContext.getProperties().getProperty("data.default.minNumericalValue")));
             this.ga.setMaxNr(Integer.parseInt(ApplicationContext.getProperties().getProperty("data.default.maxNumericalValue")));
@@ -111,18 +163,56 @@ public class MainController {
 
         try {
             strLength = Integer.parseInt(strLengthTextField.getText());
-            if (strLength > 0)
-                this.ga.setMaxStringLength(strLength);
+            if (strLength < 0)
+                strLength = Integer.parseInt(ApplicationContext.getProperties().getProperty("data.default.maxStringLength"));
+            this.ga.setMaxStringLength(strLength);
         } catch (NumberFormatException ignored) {
             this.ga.setMaxStringLength(Integer.parseInt(ApplicationContext.getProperties().getProperty("data.default.maxStringLength")));
         }
 
         try {
             solLength = Integer.parseInt(solLengthTextField.getText());
-            if (solLength > 1)
-                this.ga.setMaxSuiteLength(solLength);
+            if (solLength < 1)
+                solLength = Integer.parseInt(ApplicationContext.getProperties().getProperty("data.default.maxSuiteLength"));
+            this.ga.setMaxSuiteLength(solLength);
         } catch (NumberFormatException e) {
             this.ga.setMaxSuiteLength(Integer.parseInt(ApplicationContext.getProperties().getProperty("data.default.maxSuiteLength")));
+        }
+
+        try {
+            populationSize = Integer.parseInt(populationSizeTextField.getText());
+            if (populationSize < 2)
+                populationSize = Integer.parseInt(ApplicationContext.getProperties().getProperty("data.populationSize"));
+            this.ga.setPopulationSize(populationSize);
+        } catch (NumberFormatException e) {
+            this.ga.setPopulationSize(Integer.parseInt(ApplicationContext.getProperties().getProperty("data.populationSize")));
+        }
+
+        try {
+            generations = Integer.parseInt(generationsNumberTextField.getText());
+            if (generations < 0)
+                generations = Integer.parseInt(ApplicationContext.getProperties().getProperty("data.generations"));
+            this.ga.setGenerations(generations);
+        } catch (NumberFormatException e) {
+            this.ga.setGenerations(Integer.parseInt(ApplicationContext.getProperties().getProperty("data.generations")));
+        }
+
+        try {
+            crossoverProb = Double.parseDouble(crossoverProbabilityTextField.getText());
+            if (crossoverProb <= 0 || crossoverProb >= 1)
+                crossoverProb = Double.parseDouble(ApplicationContext.getProperties().getProperty("data.crossoverProb"));
+            this.ga.setCrossoverProb(crossoverProb);
+        } catch (NumberFormatException e) {
+            this.ga.setCrossoverProb(Double.parseDouble(ApplicationContext.getProperties().getProperty("data.crossoverProb")));
+        }
+
+        try {
+            initialAdditionProb = Double.parseDouble(additionProbabilityTextField.getText());
+            if (initialAdditionProb <= 0 || initialAdditionProb >= 1)
+                initialAdditionProb = Double.parseDouble(ApplicationContext.getProperties().getProperty("data.initialAdditionProb"));
+            this.ga.setInitialAdditionProb(initialAdditionProb);
+        } catch (NumberFormatException e) {
+            this.ga.setInitialAdditionProb(Double.parseDouble(ApplicationContext.getProperties().getProperty("data.initialAdditionProb")));
         }
 
         ToggleGroup toggleGroup = small1.getToggleGroup();
@@ -138,16 +228,20 @@ public class MainController {
 
         this.ga.setOnlyFirst(firstCheckBox.isSelected());
 
-        Thread thread = new Thread(() -> {
-            Platform.runLater(this::stateGenerating);
-            try {
-                ga.start(classPathTextField.getText());
-                Platform.runLater(this::stateDone);
-            } catch (Exception exception) {
-                Platform.runLater(() -> stateFailed(exception));
-            }
-        });
-        thread.setDaemon(true);
-        thread.start();
+        File classFile = new File(classPathTextField.getText());
+        if (!classFile.exists() || !classFile.isFile()) {
+            stateFailed(new Exception("Given path of a class file is not a .java file!"));
+            return false;
+        }
+        else
+            this.ga.setClassPath(classPathTextField.getText());
+
+        classFile = new File(resultPathTextField.getText());
+        if (!classFile.exists() || !classFile.isDirectory())
+            this.ga.setResultFile(ApplicationContext.getProperties().getProperty("data.resultsfile"));
+        else
+            this.ga.setResultFile(resultPathTextField.getText());
+
+        return true;
     }
 }

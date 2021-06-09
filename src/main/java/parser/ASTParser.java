@@ -5,9 +5,7 @@ import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.factory.Factory;
 
-import java.util.Iterator;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class ASTParser {
 
@@ -24,12 +22,16 @@ public class ASTParser {
 
     private void initialization() {
         launcher.addInputResource(classPath);
+        launcher.setSourceOutputDirectory("./src/main/resources/spooned");
         launcher.run();
 
         String[] splitedPath = classPath.split("\\\\");
         this.className = splitedPath[splitedPath.length - 1].split("\\.")[0];
         Factory factory = launcher.getFactory();
         this.methods = factory.Class().get(className).getMethods();
+        ArrayList<CtMethod<?>> methodsArray = new ArrayList<>(factory.Class().get(className).getMethods());
+        methodsArray.removeIf(method -> !method.isPublic());
+        this.methods = new LinkedHashSet<>(methodsArray);
         this.constructors = factory.Class().get(className).getConstructors();
     }
 

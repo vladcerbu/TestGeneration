@@ -10,8 +10,8 @@ import java.util.Queue;
 public class TestCase {
     private String testId = "id";
     private String testedMethodName;
-    private ArrayList<Action> actions = new ArrayList<>();
-    private ArrayList<String> values = new ArrayList<>();
+    private ArrayList<Action> actions;
+    private ArrayList<String> values;
 
     public TestCase(String testedMethodName, ArrayList<Action> actions, ArrayList<String> values) {
         this.testedMethodName = testedMethodName;
@@ -73,16 +73,21 @@ public class TestCase {
         for (Action action : this.actions) {
             code.append("\t\t");
             code.append(action.toString());
+            int commas = action.getParamTypes().size() - 1;
             for (String parType : action.getParamTypes()) {
                 String value = valueQ.remove();
                 switch (parType) {
                     case "int", "Integer" -> code.append(Integer.valueOf(value));
+                    case "float", "Float" -> code.append(Float.valueOf(value));
                     case "double", "Double" -> code.append(Double.valueOf(value));
                     case "boolean", "Boolean" -> code.append(Boolean.valueOf(value));
                     case "String" -> code.append("\"").append(value).append("\"");
+                    default -> code.append("null");
                 }
-                if (!valueQ.isEmpty())
+                if (commas > 0) {
                     code.append(", ");
+                    commas--;
+                }
             }
             code.append(");\n");
         }

@@ -19,7 +19,7 @@ public class RandomHelper {
         this.stringType = stringType;
     }
 
-    public Integer generateRandomInteger(int minNr, int maxNr) {
+    public int generateRandomInteger(int minNr, int maxNr) {
         return random.nextInt(maxNr + 1 - minNr) + minNr;
     }
 
@@ -27,7 +27,15 @@ public class RandomHelper {
         return Integer.toString(generateRandomInteger(minNr, maxNr));
     }
 
-    public Double generateRandomDouble(int minNr, int maxNr) {
+    public float generateRandomFloat(int minNr, int maxNr) {
+        return minNr + (maxNr - minNr) * random.nextFloat();
+    }
+
+    public String generateRandomFloatString(int minNr, int maxNr) {
+        return Float.toString(generateRandomFloat(minNr, maxNr));
+    }
+
+    public double generateRandomDouble(int minNr, int maxNr) {
         return minNr + (maxNr - minNr) * random.nextDouble();
     }
 
@@ -35,7 +43,7 @@ public class RandomHelper {
         return Double.toString(generateRandomDouble(minNr, maxNr));
     }
 
-    public Boolean generateRandomBoolean() {
+    public boolean generateRandomBoolean() {
         return random.nextBoolean();
     }
 
@@ -70,6 +78,7 @@ public class RandomHelper {
             for (String p : params) {
                 switch (p) {
                     case "int", "Integer" -> values.add(generateRandomIntegerString(minNr, maxNr));
+                    case "float", "Float" -> values.add(generateRandomFloatString(minNr, maxNr));
                     case "double", "Double" -> values.add(generateRandomDoubleString(minNr, maxNr));
                     case "boolean", "Boolean" -> values.add(generateRandomBooleanString());
                     case "String" -> values.add(generateRandomString(maxStringLength, stringType));
@@ -85,6 +94,7 @@ public class RandomHelper {
         for (String p : action.getParamTypes()) {
             switch (p) {
                 case "int", "Integer" -> values.add(generateRandomIntegerString(minNr, maxNr));
+                case "float", "Float" -> values.add(generateRandomFloatString(minNr, maxNr));
                 case "double", "Double" -> values.add(generateRandomDoubleString(minNr, maxNr));
                 case "boolean", "Boolean" -> values.add(generateRandomBooleanString());
                 case "String" -> values.add(generateRandomString(maxStringLength, stringType));
@@ -106,7 +116,7 @@ public class RandomHelper {
     public String generateRandomStringSmall(int maxStringLength) {
         int leftLimit = 97; // letter 'a'
         int rightLimit = 122; // letter 'z'
-        maxStringLength = generateRandomInteger(1, maxStringLength + 1);
+        maxStringLength = generateRandomInteger((maxStringLength + 1) / 2, maxStringLength + 1);
         return random.ints(leftLimit, rightLimit + 1)
                 .limit(maxStringLength)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
@@ -116,7 +126,7 @@ public class RandomHelper {
     public String generateRandomStringBig(int maxStringLength) {
         int leftLimit = 65; // letter 'A'
         int rightLimit = 122; // letter 'z'
-        maxStringLength = generateRandomInteger(1, maxStringLength + 1);
+        maxStringLength = generateRandomInteger((maxStringLength + 1) / 2, maxStringLength + 1);
         return random.ints(leftLimit, rightLimit + 1)
                 .filter(i -> (i >= 65 && i <= 90) || i >= 97)
                 .limit(maxStringLength)
@@ -127,7 +137,7 @@ public class RandomHelper {
     public String generateRandomStringNumbers(int maxStringLength) {
         int leftLimit = 48; // numeral '0'
         int rightLimit = 122; // letter 'z'
-        maxStringLength = generateRandomInteger(1, maxStringLength + 1);
+        maxStringLength = generateRandomInteger((maxStringLength + 1) / 2, maxStringLength + 1);
         return random.ints(leftLimit, rightLimit + 1)
                 .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
                 .limit(maxStringLength)
@@ -138,7 +148,7 @@ public class RandomHelper {
     public String generateRandomStringAll(int maxStringLength) {
         int leftLimit = 35; // '#'
         int rightLimit = 126; // '~'
-        maxStringLength = generateRandomInteger(1, maxStringLength + 1);
+        maxStringLength = generateRandomInteger((maxStringLength + 1) / 2, maxStringLength + 1);
         return random.ints(leftLimit, rightLimit + 1)
                 .filter(i -> i != 92) // no '\'
                 .limit(maxStringLength)

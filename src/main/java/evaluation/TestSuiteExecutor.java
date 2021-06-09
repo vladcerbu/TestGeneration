@@ -54,7 +54,7 @@ public final class TestSuiteExecutor {
     public TestSuiteExecutor() { }
 
     private void prepareEvaluation(TestSuite testSuite) {
-        String fileName = "./spooned/" + testSuite.getClassName() + ".java";
+        String fileName = "./src/main/resources/spooned/" + testSuite.getClassName() + ".java";
         try {
             String text = Files.readString(Paths.get(fileName));
             for (int i = 0; i < text.length(); ++i) {
@@ -93,7 +93,7 @@ public final class TestSuiteExecutor {
                     break;
                 }
             }
-            String temp = "./run/" + testSuite.getClassName() + ".java";
+            String temp = "./src/main/resources/run/" + testSuite.getClassName() + ".java";
             FileWriter myWriter = new FileWriter(temp);
             myWriter.write(text);
             myWriter.close();
@@ -116,8 +116,8 @@ public final class TestSuiteExecutor {
     public double execute(TestSuite testSuite) throws Exception {
         prepareEvaluation(testSuite);
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        compiler.run(null, null, null, "./run/" + testSuite.getClassName() + ".java");
-        File resource = new File("./run/" + testSuite.getClassName() + ".class");
+        compiler.run(null, null, null, "./src/main/resources/run/" + testSuite.getClassName() + ".java");
+        File resource = new File("./src/main/resources/run/" + testSuite.getClassName() + ".class");
         final String targetName = testSuite.getClassName();
 
         // For instrumentation and runtime we need a IRuntime instance
@@ -168,7 +168,7 @@ public final class TestSuiteExecutor {
         int totalBranches = branchCounter.getTotalCount();
         //noinspection ResultOfMethodCallIgnored
         resource.delete();
-        resource = new File("./run/" + testSuite.getClassName() + ".java");
+        resource = new File("./src/main/resources/run/" + testSuite.getClassName() + ".java");
         //noinspection ResultOfMethodCallIgnored
         resource.delete();
         return (double) coveredBranches / totalBranches;
