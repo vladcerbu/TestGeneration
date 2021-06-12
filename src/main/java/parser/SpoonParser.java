@@ -7,7 +7,7 @@ import spoon.reflect.factory.Factory;
 
 import java.util.*;
 
-public class ASTParser {
+public class SpoonParser {
 
     private final Launcher launcher = new Launcher();
     private final String classPath;
@@ -15,7 +15,7 @@ public class ASTParser {
     private Set<CtMethod<?>> methods;
     private Set<CtConstructor<Object>> constructors;
 
-    public ASTParser(String classPath) {
+    public SpoonParser(String classPath) {
         this.classPath = classPath;
         this.initialization();
     }
@@ -33,10 +33,6 @@ public class ASTParser {
         methodsArray.removeIf(method -> !method.isPublic());
         this.methods = new LinkedHashSet<>(methodsArray);
         this.constructors = factory.Class().get(className).getConstructors();
-    }
-
-    public String getClassPath() {
-        return classPath;
     }
 
     public String getClassName() {

@@ -6,7 +6,7 @@ import java.util.Properties;
 
 public class Config {
 
-    public static InputStream CONFIG_LOCATION=Config.class.getClassLoader().getResourceAsStream("\\config.properties");
+    public static InputStream CONFIG_LOCATION=Config.class.getClassLoader().getResourceAsStream("config.properties");
 
     public static Properties getProperties() {
         Properties properties = new Properties();

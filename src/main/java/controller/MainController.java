@@ -18,7 +18,6 @@ public class MainController {
 
     private Stage stage;
     private GA ga;
-    private int nrRuns;
 
     @FXML
     private TextField classPathTextField;
@@ -40,8 +39,6 @@ public class MainController {
     private TextField crossoverProbabilityTextField;
     @FXML
     private TextField additionProbabilityTextField;
-    @FXML
-    private Spinner<Integer> nrRunsSpinner;
 
     @FXML
     private RadioButton small1;
@@ -51,7 +48,8 @@ public class MainController {
     private RadioButton numbers3;
     @FXML
     private RadioButton others4;
-
+    @FXML
+    private Button generateButton;
     @FXML
     private CheckBox firstCheckBox;
     @FXML
@@ -60,46 +58,51 @@ public class MainController {
     private Label resultLabel;
 
     @FXML
-    public void initialize() {
-        nrRunsSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1));
-    }
+    public void initialize() { }
 
     public void init(Stage stage) {
         this.ga = new GA();
         this.stage = stage;
     }
 
+    // While the algorithm is running
     @FXML
     private void stateGenerating() {
+        generateButton.setDisable(true);
         resultLabel.setVisible(false);
         stateLabel.setTextFill(Paint.valueOf("Orange"));
         stateLabel.setText("State: Generating...");
     }
 
+    // If the algorithm ends unexpectedly then we print the error
     @FXML
     private void stateFailed(Exception exception) {
+        generateButton.setDisable(false);
         resultLabel.setVisible(false);
         stateLabel.setTextFill(Paint.valueOf("Red"));
         stateLabel.setText("State: An error has occured! " + exception.getMessage());
         System.out.println(Arrays.toString(exception.getStackTrace()));
     }
 
+    // If the algorithm ends successfully then we print the results
     @FXML
     private void stateDone() {
+        generateButton.setDisable(false);
         stateLabel.setTextFill(Paint.valueOf("Green"));
         stateLabel.setText("State: Done!");
         double result = this.ga.getBestFitness() * 100;
-        DecimalFormat df = new DecimalFormat("#.##");
+        DecimalFormat df = new DecimalFormat("#,##");
         if (result == 100.0)
             resultLabel.setTextFill(Paint.valueOf("Green"));
         if (result < 100.0)
             resultLabel.setTextFill(Paint.valueOf("Yellow"));
         if (result <= 75.0)
             resultLabel.setTextFill(Paint.valueOf("Red"));
-        resultLabel.setText("Result: The solution has a coverage of " + Double.valueOf(df.format(result)) + "%  Time: " + Double.valueOf(df.format(this.ga.getTime())) + "s");
+        resultLabel.setText("Result: The solution has a coverage of " + Double.valueOf(df.format(result)) + "%  Time: " + Double.valueOf(df.format(this.ga.getExecutionTime())) + "s");
         resultLabel.setVisible(true);
     }
 
+    // Handling of the File Chooser
     @FXML
     public void handleClassFileChoice() {
         FileChooser fileChooser = new FileChooser();
@@ -110,6 +113,7 @@ public class MainController {
             classPathTextField.setText("You need to specify a .java file.");
     }
 
+    // Handling of the Directory Chooser
     @FXML
     public void handleResultFileChoice() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -120,31 +124,29 @@ public class MainController {
             resultPathTextField.setText("You need to specify a directory.");
     }
 
+    // Pressing the Generate button
     @FXML
     public void handleGenerate() {
         if (prepareParameters()) {
                 Thread thread = new Thread(() -> {
-                    for (int i = 0; i < nrRuns; ++i) {
-                        System.out.println(i + 1);
-                        Platform.runLater(this::stateGenerating);
-                        try {
-                            this.ga.start();
-                            Platform.runLater(this::stateDone);
-                        } catch (Exception exception) {
-                            Platform.runLater(() -> stateFailed(exception));
-                        }
+                    Platform.runLater(this::stateGenerating);
+                    try {
+                        this.ga.startAlgorithm();
+                        Platform.runLater(this::stateDone);
+                    } catch (Exception exception) {
+                        Platform.runLater(() -> stateFailed(exception));
                     }
                 });
                 thread.setDaemon(true);
                 thread.start();
-
         }
     }
 
+    // Preparing parameters for the algorithm. If no parameter is specified then
+    // we choose the default one from the resource file
     private boolean prepareParameters() {
         int minNr, maxNr, strLength, solLength, populationSize, generations;
         double crossoverProb, initialAdditionProb;
-        nrRuns = nrRunsSpinner.getValue();
 
         try {
             minNr = Integer.parseInt(minNrTextField.getText());
@@ -228,6 +230,8 @@ public class MainController {
 
         this.ga.setOnlyFirst(firstCheckBox.isSelected());
 
+        // A requirement of the algorithm is that the path to the class file is correct.
+        // If not, then the execution can't take place, so we return false here
         File classFile = new File(classPathTextField.getText());
         if (!classFile.exists() || !classFile.isFile()) {
             stateFailed(new Exception("Given path of a class file is not a .java file!"));
@@ -242,6 +246,6 @@ public class MainController {
         else
             this.ga.setResultFile(resultPathTextField.getText());
 
-        return true;
+        return true; // If everything is in order we return true
     }
 }

@@ -1,4 +1,4 @@
-package evaluation;
+package executor;
 
 import chromosome.TestCase;
 import chromosome.TestSuite;
@@ -31,6 +31,7 @@ import java.util.Queue;
 
 public final class TestSuiteExecutor {
 
+    // Class that will help with loading the instrumented java code into memory
     public static class MemoryClassLoader extends ClassLoader {
 
         private final Map<String, byte[]> definitions = new HashMap<>();
@@ -53,13 +54,15 @@ public final class TestSuiteExecutor {
 
     public TestSuiteExecutor() { }
 
+    // Preparing the evaluation by modifying the tested class. We make it so that it implements
+    // the Runnable interface and then add the test cases to the run() method
     private void prepareEvaluation(TestSuite testSuite) {
         String fileName = "./src/main/resources/spooned/" + testSuite.getClassName() + ".java";
         try {
             String text = Files.readString(Paths.get(fileName));
             for (int i = 0; i < text.length(); ++i) {
                 if (text.charAt(i) == '{') {
-                    text = insertString(text, "implements Runnable ", i-1);
+                    text = this.insertString(text, "implements Runnable ", i-1);
                     break;
                 }
             }
@@ -89,7 +92,7 @@ public final class TestSuiteExecutor {
             newCode.append("\t}");
             for (int i = text.length() - 1; i >= 0; --i) {
                 if (text.charAt(i) == '}') {
-                    text = insertString(text, newCode.toString(), i-2);
+                    text = this.insertString(text, newCode.toString(), i-2);
                     break;
                 }
             }
@@ -102,6 +105,7 @@ public final class TestSuiteExecutor {
         }
     }
 
+    // Helper function that inserts a String into another String after a certain index
     private String insertString(String originalString, String stringToBeInserted, int index) {
         StringBuilder newString = new StringBuilder();
         for (int i = 0; i < originalString.length(); i++) {
@@ -113,49 +117,46 @@ public final class TestSuiteExecutor {
         return newString.toString();
     }
 
-    public double execute(TestSuite testSuite) throws Exception {
-        prepareEvaluation(testSuite);
+    // Main method of the executor. We receive a test suite and we return its fitness:
+    // number of branches covered / total number of branches
+    public double calculateFitness(TestSuite testSuite) throws Exception {
+        this.prepareEvaluation(testSuite);
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         compiler.run(null, null, null, "./src/main/resources/run/" + testSuite.getClassName() + ".java");
         File resource = new File("./src/main/resources/run/" + testSuite.getClassName() + ".class");
         final String targetName = testSuite.getClassName();
 
-        // For instrumentation and runtime we need a IRuntime instance
-        // to collect execution data:
+        // For instrumentation and runtime we need an IRuntime instance to collect execution data
         final IRuntime runtime = new LoggerRuntime();
 
-        // The Instrumenter creates a modified version of our test target class
-        // that contains additional probes for execution data recording:
+        // The Instrumenter creates a modified version of the test target class
+        // that contains additional probes for execution data recording
         final Instrumenter instr = new Instrumenter(runtime);
         InputStream original = FileUtils.openInputStream(resource);
         final byte[] instrumented = instr.instrument(original, targetName);
         original.close();
 
-        // Now we're ready to run our instrumented class and need to startup the
-        // runtime first:
+        // Starting up the runtime
         final RuntimeData data = new RuntimeData();
         runtime.startup(data);
 
-        // In this tutorial we use a special class loader to directly load the
-        // instrumented class definition from a byte[] instances.
+        // Using a special class loader to directly load the instrumented class definition from a byte array
         final MemoryClassLoader memoryClassLoader = new MemoryClassLoader();
         memoryClassLoader.addDefinition(targetName, instrumented);
         final Class<?> targetClass = memoryClassLoader.loadClass(targetName);
 
-        // Here we execute our test target class through its Runnable interface:
+        // Here we execute our test target class through its Runnable interface
         final Constructor<?> constructor = targetClass.getConstructors()[0];
         final Runnable targetInstance = (Runnable) constructor.newInstance();
         targetInstance.run();
 
-        // At the end of test execution we collect execution data and shutdown
-        // the runtime:
+        // At the end of test execution we collect execution data and shutdown the runtime
         final ExecutionDataStore executionData = new ExecutionDataStore();
         final SessionInfoStore sessionInfos = new SessionInfoStore();
         data.collect(executionData, sessionInfos, false);
         runtime.shutdown();
 
-        // Together with the original class definition we can calculate coverage
-        // information:
+        // Together with the original class definition we can calculate coverage information
         final CoverageBuilder coverageBuilder = new CoverageBuilder();
         final Analyzer analyzer = new Analyzer(executionData, coverageBuilder);
         original = FileUtils.openInputStream(resource);
@@ -164,13 +165,13 @@ public final class TestSuiteExecutor {
 
         IClassCoverage cc = (IClassCoverage) coverageBuilder.getClasses().toArray()[0];
         ICounter branchCounter = cc.getBranchCounter();
-        int coveredBranches = branchCounter.getCoveredCount();
-        int totalBranches = branchCounter.getTotalCount();
+        int coveredBranches = branchCounter.getCoveredCount(); // Number of covered branches
+        int totalBranches = branchCounter.getTotalCount(); // Number of total branches
         //noinspection ResultOfMethodCallIgnored
         resource.delete();
         resource = new File("./src/main/resources/run/" + testSuite.getClassName() + ".java");
         //noinspection ResultOfMethodCallIgnored
         resource.delete();
-        return (double) coveredBranches / totalBranches;
+        return (double) coveredBranches / totalBranches; // Resulting fitness
     }
 }

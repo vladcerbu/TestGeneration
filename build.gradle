@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.openjfx.javafxplugin' version '0.0.9'
     id 'application'
+    id "com.github.johnrengelman.shadow" version "5.2.0"
 }
 
 group 'org.thesis'
@@ -29,4 +30,14 @@ javafx {
     modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
-mainClassName = 'application.Main'
+application {
+    mainClassName = 'application.Main'
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'application.Main'
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}

@@ -4,7 +4,6 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
-<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
@@ -18,7 +17,7 @@
          <content>
             <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="600.0" style="-fx-background-color: lightblue;">
                <children>
-                  <Label layoutX="121.0" layoutY="14.0" text="TEST CASE GENERATION" textFill="#5900a2">
+                  <Label layoutX="99.0" layoutY="14.0" text="G-SUITE TEST GENERATION" textFill="#5900a2">
                      <font>
                         <Font name="Calibri Bold" size="36.0" />
                      </font>
@@ -48,7 +47,6 @@
                         <Font size="14.0" />
                      </font>
                   </Label>
-                  <Label layoutX="14.0" layoutY="321.0" text="Number of Runs:" />
                   <Label fx:id="stateLabel" alignment="TOP_LEFT" layoutX="25.0" layoutY="350.0" prefHeight="75.0" prefWidth="550.0" text="State: App Started" textFill="#03aa00" wrapText="true">
                      <font>
                         <Font name="System Bold" size="16.0" />
@@ -80,8 +78,7 @@
                         <Font size="14.0" />
                      </font>
                   </CheckBox>
-                  <Spinner fx:id="nrRunsSpinner" editable="true" layoutX="114.0" layoutY="317.0" prefHeight="26.0" prefWidth="103.0" />
-                  <Button layoutX="240.0" layoutY="310.0" mnemonicParsing="false" onAction="#handleGenerate" prefHeight="40.0" prefWidth="120.0" text="Generate" textFill="#018c11">
+                  <Button fx:id="generateButton" layoutX="240.0" layoutY="310.0" mnemonicParsing="false" onAction="#handleGenerate" prefHeight="40.0" prefWidth="120.0" text="Generate" textFill="#018c11">
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font>
@@ -99,12 +96,12 @@
                         <Font name="System Bold Italic" size="24.0" />
                      </font>
                   </Label>
-                  <Label layoutX="54.0" layoutY="112.0" text="Size of Population">
+                  <Label layoutX="54.0" layoutY="112.0" text="Number of Generations">
                      <font>
                         <Font name="System Bold" size="18.0" />
                      </font>
                   </Label>
-                  <Label layoutX="54.0" layoutY="194.0" text="Number of Generations">
+                  <Label layoutX="54.0" layoutY="194.0" text="Size of Population">
                      <font>
                         <Font name="System Bold" size="18.0" />
                      </font>
@@ -119,22 +116,22 @@
                         <Font name="System Bold" size="18.0" />
                      </font>
                   </Label>
-                  <TextField fx:id="populationSizeTextField" alignment="CENTER" layoutX="315.0" layoutY="100.0" prefHeight="57.0" prefWidth="162.0" promptText="Default:">
+                  <TextField fx:id="generationsNumberTextField" alignment="CENTER" layoutX="315.0" layoutY="97.0" prefHeight="57.0" prefWidth="162.0" promptText="Default:">
                      <font>
                         <Font size="18.0" />
                      </font>
                   </TextField>
-                  <TextField fx:id="generationsNumberTextField" alignment="CENTER" layoutX="315.0" layoutY="179.0" prefHeight="57.0" prefWidth="162.0" promptText="Default:">
+                  <TextField fx:id="populationSizeTextField" alignment="CENTER" layoutX="315.0" layoutY="179.0" prefHeight="57.0" prefWidth="162.0" promptText="Default:">
                      <font>
                         <Font size="18.0" />
                      </font>
                   </TextField>
-                  <TextField fx:id="crossoverProbabilityTextField" alignment="CENTER" layoutX="315.0" layoutY="261.0" prefHeight="57.0" prefWidth="162.0" promptText="Default:">
+                  <TextField fx:id="crossoverProbabilityTextField" alignment="CENTER" layoutX="315.0" layoutY="261.0" prefHeight="57.0" prefWidth="162.0" promptText="Default: 0.5">
                      <font>
                         <Font size="18.0" />
                      </font>
                   </TextField>
-                  <TextField fx:id="additionProbabilityTextField" alignment="CENTER" layoutX="315.0" layoutY="337.0" prefHeight="57.0" prefWidth="162.0" promptText="Default:">
+                  <TextField fx:id="additionProbabilityTextField" alignment="CENTER" layoutX="315.0" layoutY="337.0" prefHeight="57.0" prefWidth="162.0" promptText="Default: 0.5">
                      <font>
                         <Font size="18.0" />
                      </font>

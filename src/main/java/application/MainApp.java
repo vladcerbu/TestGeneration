@@ -20,7 +20,7 @@ public class MainApp extends Application {
         MainController mainCtrl = loader.getController();
         mainCtrl.init(primaryStage);
         primaryScene = new Scene(root);
-        primaryStage.setTitle("JavaFX and Gradle");
+        primaryStage.setTitle("G-Suite");
         primaryStage.setScene(primaryScene);
         primaryStage.show();
     }

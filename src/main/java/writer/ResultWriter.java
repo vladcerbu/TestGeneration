@@ -14,6 +14,10 @@ public class ResultWriter {
         this.resultsFile = resultsFile;
     }
 
+    /**
+     * Writes the given test suite to a java file
+     * @param testSuite The Test Suite to be written
+     */
     public void writeSuite(TestSuite testSuite) throws IOException {
         String fileName = this.resultsFile + "\\\\" + testSuite.getClassName() + "Test.java";
         BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, false));
@@ -21,10 +25,10 @@ public class ResultWriter {
         writer.close();
     }
 
-    public void writePerformance(String className, int generations, int populationSize, double bestFitness, double averageFitness, double worstFitness, double time) throws IOException {
-        String fileName = this.resultsFile + "\\\\" + className + "Test_performance_nrGen" + generations + "_popSize" + populationSize + ".csv";
-        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true));
-        writer.write(bestFitness + "," + averageFitness + "," + worstFitness + "," + time + "\n");
-        writer.close();
-    }
+//    public void writePerformance(String className, int generations, int populationSize, double bestFitness, double averageFitness, double worstFitness, double time) throws IOException {
+//        String fileName = this.resultsFile + "\\\\" + className + "Test_performance_nrGen" + generations + "_popSize" + populationSize + ".csv";
+//        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true));
+//        writer.write(bestFitness + "," + averageFitness + "," + worstFitness + "," + time + "\n");
+//        writer.close();
+//    }
 }
