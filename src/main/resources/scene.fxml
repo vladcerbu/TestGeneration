@@ -17,7 +17,7 @@
          <content>
             <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="600.0" style="-fx-background-color: lightblue;">
                <children>
-                  <Label layoutX="99.0" layoutY="14.0" text="G-SUITE TEST GENERATION" textFill="#5900a2">
+                  <Label layoutX="88.0" layoutY="14.0" text="GA-SUITE TEST GENERATION" textFill="#5900a2">
                      <font>
                         <Font name="Calibri Bold" size="36.0" />
                      </font>
@@ -116,12 +116,12 @@
                         <Font name="System Bold" size="18.0" />
                      </font>
                   </Label>
-                  <TextField fx:id="generationsNumberTextField" alignment="CENTER" layoutX="315.0" layoutY="97.0" prefHeight="57.0" prefWidth="162.0" promptText="Default:">
+                  <TextField fx:id="generationsNumberTextField" alignment="CENTER" layoutX="315.0" layoutY="97.0" prefHeight="57.0" prefWidth="162.0" promptText="Default: 25">
                      <font>
                         <Font size="18.0" />
                      </font>
                   </TextField>
-                  <TextField fx:id="populationSizeTextField" alignment="CENTER" layoutX="315.0" layoutY="179.0" prefHeight="57.0" prefWidth="162.0" promptText="Default:">
+                  <TextField fx:id="populationSizeTextField" alignment="CENTER" layoutX="315.0" layoutY="179.0" prefHeight="57.0" prefWidth="162.0" promptText="Default: 25">
                      <font>
                         <Font size="18.0" />
                      </font>

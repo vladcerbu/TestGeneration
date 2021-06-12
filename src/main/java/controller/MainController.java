@@ -91,14 +91,13 @@ public class MainController {
         stateLabel.setTextFill(Paint.valueOf("Green"));
         stateLabel.setText("State: Done!");
         double result = this.ga.getBestFitness() * 100;
-        DecimalFormat df = new DecimalFormat("#,##");
         if (result == 100.0)
             resultLabel.setTextFill(Paint.valueOf("Green"));
         if (result < 100.0)
             resultLabel.setTextFill(Paint.valueOf("Yellow"));
         if (result <= 75.0)
             resultLabel.setTextFill(Paint.valueOf("Red"));
-        resultLabel.setText("Result: The solution has a coverage of " + Double.valueOf(df.format(result)) + "%  Time: " + Double.valueOf(df.format(this.ga.getExecutionTime())) + "s");
+        resultLabel.setText("Result: The solution has a coverage of " + String.format("%.2f", result) + "%  Time: " + String.format("%.2f", this.ga.getExecutionTime()) + "s");
         resultLabel.setVisible(true);
     }
 
