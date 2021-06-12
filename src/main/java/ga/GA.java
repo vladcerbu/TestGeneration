@@ -148,7 +148,7 @@ public class GA {
     }
 
     // Genetic Algorithm main function
-    public void startAlgorithm() {
+    public void startAlgorithm() throws Exception {
         long start = System.nanoTime();
         this.initialize();
         for (int gen = 0; gen < generations; gen++) {
@@ -200,8 +200,8 @@ public class GA {
         // Write the resulted test suite (the best one)
         try {
             resultWriter.writeSuite(population.get(0));
-        } catch (IOException ignored) {
-
+        } catch (IOException e) {
+            throw new Exception("Unable to write the result");
         }
 
         // Delete spooned file

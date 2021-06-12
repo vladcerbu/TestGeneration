@@ -80,6 +80,7 @@ public final class TestSuiteExecutor {
                             case "double", "Double" -> newCode.append(Double.valueOf(value));
                             case "boolean", "Boolean" -> newCode.append(Boolean.valueOf(value));
                             case "String" -> newCode.append("\"").append(value).append("\"");
+                            default -> newCode.append("null");
                         }
                         if (commas > 0) {
                             newCode.append(", ");
