@@ -1,5 +1,6 @@
 package application;
 
+import controller.ConfirmBox;
 import controller.MainController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -20,8 +21,13 @@ public class MainApp extends Application {
         MainController mainCtrl = loader.getController();
         mainCtrl.init(primaryStage);
         primaryScene = new Scene(root);
-        primaryStage.setTitle("G-Suite");
+        primaryStage.setTitle("GA-Suite");
         primaryStage.setScene(primaryScene);
+        primaryStage.setOnCloseRequest(e -> {
+            e.consume();
+            if(ConfirmBox.display("Exiting application","Are you sure you want to close the app?"))
+                primaryStage.close();
+        });
         primaryStage.show();
     }
 

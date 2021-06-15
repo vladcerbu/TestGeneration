@@ -11,7 +11,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.Arrays;
 
 public class MainController {

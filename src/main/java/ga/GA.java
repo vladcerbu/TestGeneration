@@ -14,6 +14,7 @@ import writer.ResultWriter;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -209,12 +210,9 @@ public class GA {
         //noinspection ResultOfMethodCallIgnored
         file.delete();
 
-        // Performance stats
+        // Calculate execution time
         long end = System.nanoTime();
         executionTime = (double) (end - start) / 1E9;
-//        try {
-//            resultWriter.writePerformance(population.get(0).getClassName(), generations, populationSize, getBestFitness(), getAverageFitness(), getWorstFitness(), time);
-//        } catch (IOException ignored) { }
     }
 
     // Selection operator - Rank-Based Selection

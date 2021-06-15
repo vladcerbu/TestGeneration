@@ -121,7 +121,7 @@
                         <Font size="18.0" />
                      </font>
                   </TextField>
-                  <TextField fx:id="populationSizeTextField" alignment="CENTER" layoutX="315.0" layoutY="179.0" prefHeight="57.0" prefWidth="162.0" promptText="Default: 25">
+                  <TextField fx:id="populationSizeTextField" alignment="CENTER" layoutX="315.0" layoutY="179.0" prefHeight="57.0" prefWidth="162.0" promptText="Default: 50">
                      <font>
                         <Font size="18.0" />
                      </font>
