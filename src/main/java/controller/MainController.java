@@ -94,7 +94,7 @@ public class MainController {
             resultLabel.setTextFill(Paint.valueOf("Green"));
         if (result < 100.0)
             resultLabel.setTextFill(Paint.valueOf("Yellow"));
-        if (result <= 75.0)
+        if (result < 80.0)
             resultLabel.setTextFill(Paint.valueOf("Red"));
         resultLabel.setText("Result: The solution has a coverage of " + String.format("%.2f", result) + "%  Time: " + String.format("%.2f", this.ga.getExecutionTime()) + "s");
         resultLabel.setVisible(true);

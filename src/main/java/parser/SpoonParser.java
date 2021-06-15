@@ -22,7 +22,7 @@ public class SpoonParser {
 
     private void initialization() {
         launcher.addInputResource(classPath);
-        launcher.setSourceOutputDirectory("./src/main/resources/spooned");
+        launcher.setSourceOutputDirectory("src/main/resources/spooned");
         launcher.run();
 
         String[] splitedPath = classPath.split("\\\\");

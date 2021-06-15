@@ -196,8 +196,6 @@ public class GA {
             }
         }
 
-        // Optimize found test suite by potentially reducing its length
-        population.set(0, this.optimizeSolution(population.get(0)));
         // Write the resulted test suite (the best one)
         try {
             resultWriter.writeSuite(population.get(0));
@@ -206,7 +204,7 @@ public class GA {
         }
 
         // Delete spooned file
-        File file = new File("./src/main/resources/spooned/" + population.get(0).getClassName() + ".java");
+        File file = new File("src/main/resources/spooned/" + population.get(0).getClassName() + ".java");
         //noinspection ResultOfMethodCallIgnored
         file.delete();
 
@@ -411,17 +409,4 @@ public class GA {
         }
     }
 
-    // Optimizing a test suite by trying to delete some test cases and see if it impacts the fitness
-    private TestSuite optimizeSolution(TestSuite testSuite) {
-        TestSuite newSuite = new TestSuite(testSuite.getClassName(), testSuite.getTestCases());
-        newSuite.getTestCases().remove(randomHelper.generateRandomInteger(0, newSuite.getTestCases().size() - 1));
-        newSuite.setFitness(this.evaluateChromosome(newSuite));
-        while(testSuite.getFitness().equals(newSuite.getFitness())) {
-            testSuite = newSuite;
-            newSuite = new TestSuite(testSuite.getClassName(), testSuite.getTestCases());
-            newSuite.getTestCases().remove(randomHelper.generateRandomInteger(0, newSuite.getTestCases().size() - 1));
-            newSuite.setFitness(this.evaluateChromosome(newSuite));
-        }
-        return testSuite;
-    }
 }
