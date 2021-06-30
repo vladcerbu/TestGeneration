@@ -76,6 +76,7 @@ public final class TestSuiteExecutor {
                     switch (parType) {
                         case "int", "Integer" -> newCode.append(Integer.valueOf(value));
                         case "double", "Double" -> newCode.append(Double.valueOf(value));
+                        case "float", "Float" -> newCode.append(Float.valueOf(value)).append("f");
                         case "boolean", "Boolean" -> newCode.append(Boolean.valueOf(value));
                         case "String" -> newCode.append("\"").append(value).append("\"");
                         default -> newCode.append("null");

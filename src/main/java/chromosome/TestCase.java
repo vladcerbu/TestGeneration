@@ -88,7 +88,7 @@ public class TestCase {
                 String value = valueQ.remove();
                 switch (parType) {
                     case "int", "Integer" -> code.append(Integer.valueOf(value));
-                    case "float", "Float" -> code.append(Float.valueOf(value));
+                    case "float", "Float" -> code.append(Float.valueOf(value)).append("f");
                     case "double", "Double" -> code.append(Double.valueOf(value));
                     case "boolean", "Boolean" -> code.append(Boolean.valueOf(value));
                     case "String" -> code.append("\"").append(value).append("\"");
