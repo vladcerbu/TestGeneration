@@ -13,6 +13,16 @@ public class TestCase {
     private ArrayList<Action> actions;
     private ArrayList<String> values;
 
+    public TestCase(TestCase copied) {
+        this.testId = copied.getTestId();
+        this.testedMethodName = copied.getTestedMethodName();
+        this.actions = new ArrayList<>();
+        for (Action action : copied.getActions())
+            this.actions.add(action.makeCopy());
+        this.values = new ArrayList<>();
+        this.values.addAll(copied.getValues());
+    }
+
     public TestCase(String testedMethodName, ArrayList<Action> actions, ArrayList<String> values) {
         this.testedMethodName = testedMethodName;
         this.actions = actions;

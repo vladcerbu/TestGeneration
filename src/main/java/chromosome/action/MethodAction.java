@@ -6,6 +6,10 @@ public class MethodAction extends Action {
     private String callName;
     private String methodName;
 
+    private MethodAction() {
+        super();
+    }
+
     public MethodAction(CtMethod<?> method, String callName, String varName) {
         super(method, varName);
         this.callName = callName;
@@ -26,6 +30,17 @@ public class MethodAction extends Action {
 
     public void setMethodName(String methodName) {
         this.methodName = methodName;
+    }
+
+    @Override
+    public Action makeCopy() {
+        MethodAction copy = new MethodAction();
+        copy.setType(this.type);
+        copy.setVarName(this.varName);
+        copy.setCallName(this.callName);
+        copy.setMethodName(this.methodName);
+        copy.setParamTypes(this.paramTypes);
+        return copy;
     }
 
     @Override

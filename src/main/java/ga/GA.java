@@ -14,7 +14,6 @@ import writer.ResultWriter;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -158,14 +157,17 @@ public class GA {
                 break;
             ArrayList<TestSuite> newPop = new ArrayList<>();
             // Elitism: The best suite from the previous generation is kept in the new population
-            newPop.add(population.get(0));
+            newPop.add(new TestSuite(population.get(0)));
             while (newPop.size() < populationSize) {
-                ArrayList<TestSuite> offsprings;
+                ArrayList<TestSuite> offsprings = new ArrayList<>();
                 ArrayList<TestSuite> parents = this.select(); // Selecting parents
                 if (randomHelper.generateRandomDouble(0, 1) < crossoverProb) // Crossover if probability is met
-                    offsprings = this.crossover(parents.get(0), parents.get(1));
+                    offsprings = this.crossover(new TestSuite(parents.get(0)), new TestSuite(parents.get(1)));
                 else // Else the offsprings will be the parents
-                    offsprings = parents;
+                {
+                    offsprings.add(new TestSuite(parents.get(0)));
+                    offsprings.add(new TestSuite(parents.get(1)));
+                }
                 // Mutating the offsprings
                 offsprings.set(0, this.mutate(offsprings.get(0)));
                 offsprings.set(1, this.mutate(offsprings.get(1)));

@@ -8,9 +8,13 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public abstract class Action {
-    private String type;
-    private String varName;
-    private ArrayList<String> paramTypes = new ArrayList<>();
+    protected String type;
+    protected String varName;
+    protected ArrayList<String> paramTypes = new ArrayList<>();
+
+    protected Action() {}
+
+    public abstract Action makeCopy();
 
     public Action(CtMethod<?> method, String varName) {
         this.type = method.getType().getSimpleName();
@@ -62,6 +66,6 @@ public abstract class Action {
     }
 
     public void setParamTypes(ArrayList<String> paramTypes) {
-        this.paramTypes = paramTypes;
+        this.paramTypes = new ArrayList<>(paramTypes);
     }
 }

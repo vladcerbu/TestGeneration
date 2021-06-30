@@ -7,6 +7,14 @@ public class TestSuite {
     private ArrayList<TestCase> testCases;
     private double fitness;
 
+    public TestSuite(TestSuite copied) {
+        this.className = copied.getClassName();
+        this.testCases = new ArrayList<>();
+        this.fitness = copied.getFitness();
+        for (TestCase copied_tc : copied.getTestCases())
+            this.testCases.add(new TestCase(copied_tc));
+    }
+
     public TestSuite(String className) {
         this.className = className;
     }
