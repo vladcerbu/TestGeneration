@@ -205,8 +205,8 @@ public class GA {
             throw new Exception("Unable to write the result");
         }
 
-        // Delete spooned file
-        File file = new File("src/main/resources/spooned/" + population.get(0).getClassName() + ".java");
+        // Delete files
+        File file = new File(System.getProperty("java.io.tmpdir") + "/ga_suite/spooned/" + population.get(0).getClassName() + ".java");
         //noinspection ResultOfMethodCallIgnored
         file.delete();
 

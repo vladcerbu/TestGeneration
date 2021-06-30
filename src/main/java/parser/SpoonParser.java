@@ -22,7 +22,8 @@ public class SpoonParser {
 
     private void initialization() {
         launcher.addInputResource(classPath);
-        launcher.setSourceOutputDirectory("src/main/resources/spooned");
+        launcher.setSourceOutputDirectory(System.getProperty("java.io.tmpdir") + "/ga_suite/spooned");
+//        launcher.setSourceOutputDirectory("src/main/resources/spooned");
         launcher.run();
 
         String[] splitedPath = classPath.split("\\\\");

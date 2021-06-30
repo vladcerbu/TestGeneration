@@ -19,7 +19,6 @@ import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.nio.file.Files;
@@ -56,54 +55,51 @@ public final class TestSuiteExecutor {
 
     // Preparing the evaluation by modifying the tested class. We make it so that it implements
     // the Runnable interface and then add the test cases to the run() method
-    private void prepareEvaluation(TestSuite testSuite) {
-        String fileName = "src/main/resources/spooned/" + testSuite.getClassName() + ".java";
-        try {
-            String text = Files.readString(Paths.get(fileName));
-            for (int i = 0; i < text.length(); ++i) {
-                if (text.charAt(i) == '{') {
-                    text = this.insertString(text, "implements Runnable ", i-1);
-                    break;
-                }
+    private void prepareEvaluation(TestSuite testSuite) throws Exception {
+        String fileName = System.getProperty("java.io.tmpdir") + "/ga_suite/spooned/" + testSuite.getClassName() + ".java";
+        String text = Files.readString(Paths.get(fileName));
+        for (int i = 0; i < text.length(); ++i) {
+            if (text.charAt(i) == '{') {
+                text = this.insertString(text, "implements Runnable ", i-1);
+                break;
             }
-            StringBuilder newCode = new StringBuilder("\n\t@Override\n\tpublic void run() {\n");
-            for (TestCase testCase : testSuite.getTestCases()) {
-                Queue<String> valueQ = new LinkedList<>(testCase.getValues());
-                for (Action action : testCase.getActions()) {
-                    newCode.append("\t\t");
-                    newCode.append(action.toString());
-                    int commas = action.getParamTypes().size() - 1;
-                    for (String parType : action.getParamTypes()) {
-                        String value = valueQ.remove();
-                        switch (parType) {
-                            case "int", "Integer" -> newCode.append(Integer.valueOf(value));
-                            case "double", "Double" -> newCode.append(Double.valueOf(value));
-                            case "boolean", "Boolean" -> newCode.append(Boolean.valueOf(value));
-                            case "String" -> newCode.append("\"").append(value).append("\"");
-                            default -> newCode.append("null");
-                        }
-                        if (commas > 0) {
-                            newCode.append(", ");
-                            commas--;
-                        }
-                    }
-                    newCode.append(");\n");
-                }
-            }
-            newCode.append("\t}");
-            for (int i = text.length() - 1; i >= 0; --i) {
-                if (text.charAt(i) == '}') {
-                    text = this.insertString(text, newCode.toString(), i-2);
-                    break;
-                }
-            }
-            String temp = "src/main/resources/run/" + testSuite.getClassName() + ".java";
-            FileWriter myWriter = new FileWriter(temp);
-            myWriter.write(text);
-            myWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+        StringBuilder newCode = new StringBuilder("\n\t@Override\n\tpublic void run() {\n");
+        for (TestCase testCase : testSuite.getTestCases()) {
+            Queue<String> valueQ = new LinkedList<>(testCase.getValues());
+            for (Action action : testCase.getActions()) {
+                newCode.append("\t\t");
+                newCode.append(action.toString());
+                int commas = action.getParamTypes().size() - 1;
+                for (String parType : action.getParamTypes()) {
+                    String value = valueQ.remove();
+                    switch (parType) {
+                        case "int", "Integer" -> newCode.append(Integer.valueOf(value));
+                        case "double", "Double" -> newCode.append(Double.valueOf(value));
+                        case "boolean", "Boolean" -> newCode.append(Boolean.valueOf(value));
+                        case "String" -> newCode.append("\"").append(value).append("\"");
+                        default -> newCode.append("null");
+                    }
+                    if (commas > 0) {
+                        newCode.append(", ");
+                        commas--;
+                    }
+                }
+                newCode.append(");\n");
+            }
+        }
+        newCode.append("\t}");
+        for (int i = text.length() - 1; i >= 0; --i) {
+            if (text.charAt(i) == '}') {
+                text = this.insertString(text, newCode.toString(), i-2);
+                break;
+            }
+        }
+        File temp = new File(System.getProperty("java.io.tmpdir") + "/ga_suite/run/" + testSuite.getClassName() + ".java");
+        temp.getParentFile().mkdirs();
+        FileWriter myWriter = new FileWriter(temp);
+        myWriter.write(text);
+        myWriter.close();
     }
 
     // Helper function that inserts a String into another String after a certain index
@@ -123,8 +119,8 @@ public final class TestSuiteExecutor {
     public double calculateFitness(TestSuite testSuite) throws Exception {
         this.prepareEvaluation(testSuite);
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        compiler.run(null, null, null, "src/main/resources/run/" + testSuite.getClassName() + ".java");
-        File resource = new File("src/main/resources/run/" + testSuite.getClassName() + ".class");
+        compiler.run(null, null, null, System.getProperty("java.io.tmpdir") + "/ga_suite/run/" + testSuite.getClassName() + ".java");
+        File resource = new File(System.getProperty("java.io.tmpdir") + "/ga_suite/run/" + testSuite.getClassName() + ".class");
         final String targetName = testSuite.getClassName();
 
         // For instrumentation and runtime we need an IRuntime instance to collect execution data
@@ -170,7 +166,7 @@ public final class TestSuiteExecutor {
         int totalBranches = branchCounter.getTotalCount(); // Number of total branches
         //noinspection ResultOfMethodCallIgnored
         resource.delete();
-        resource = new File("src/main/resources/run/" + testSuite.getClassName() + ".java");
+        resource = new File(System.getProperty("java.io.tmpdir") + "/ga_suite/run/" + testSuite.getClassName() + ".java");
         //noinspection ResultOfMethodCallIgnored
         resource.delete();
         return (double) coveredBranches / totalBranches; // Resulting fitness
